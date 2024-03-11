@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".activites.LoginActivity">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/cookierun_bold"
+        android:padding="16dp"
+        android:text="미정"
+        android:textColor="@color/black"
+        android:textSize="40sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btn_go"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        style="@style/Widget.MaterialComponents.Button"
+        android:backgroundTint="@color/white"
+        android:text="미정 둘러보기"
+        android:textColor="@color/black"
+        android:fontFamily="@font/cookierun_bold"
+        android:layout_gravity="center"/>
+
+    <ImageView
+        android:id="@+id/iv_night"
+        android:layout_width="250dp"
+        android:layout_height="200dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/btn_login_kakao"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:src="@drawable/kakao_login"
+            android:background="@color/white"
+            android:layout_marginBottom="8dp"
+            android:layout_centerHorizontal="true"/>
+
+        <ImageView
+            android:id="@+id/btn_login_naver"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/btn_login_kakao"
+            android:layout_marginBottom="4dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/naver_login" />
+
+        <Button
+            android:id="@+id/btn_login_google"
+            android:layout_width="180dp"
+            android:layout_height="55dp"
+            style="@style/Widget.MaterialComponents.Button"
+            android:backgroundTint="@color/btnPrimaryColor"
+            android:text="구글 로그인"
+            android:fontFamily="@font/roboto_medium"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:drawableLeft="@drawable/google_logo"
+            android:layout_marginBottom="1dp"
+            android:paddingEnd="32dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/btn_login_naver" />
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="180dp"
+            android:layout_height="55dp"
+            style="@style/Widget.MaterialComponents.Button"
+            android:backgroundTint="@color/btnPrimaryColor"
+            android:text="이메일 로그인"
+            android:textColor="@color/black"
+            android:fontFamily="@font/cookierun_bold"
+            android:drawableLeft="@drawable/email_24"
+            android:paddingEnd="32dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/btn_login_google" />
+
+        <Button
+            android:id="@+id/btn_signup"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_below="@id/btn_login"
+            android:backgroundTint="@color/primaryColor"
+            android:text="이메일 회원가입"
+            android:textColor="@color/black"
+            android:fontFamily="@font/cookierun_bold"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CKE STUDIO"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="16dp"/>
+
+</LinearLayout>

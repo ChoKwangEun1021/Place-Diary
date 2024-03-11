@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_bnv_home"
+        android:icon="@drawable/ic_action_home"
+        android:title=""
+        app:showAsAction="always"
+        android:checked="true"/>
+
+    <item
+        android:id="@+id/menu_bnv_place"
+        android:icon="@drawable/ic_action_place"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_bnv_list"
+        android:icon="@drawable/ic_action_list"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_bnv_profile"
+        android:icon="@drawable/ic_action_person"
+        android:title=""
+        app:showAsAction="always" />
+
+</menu>
