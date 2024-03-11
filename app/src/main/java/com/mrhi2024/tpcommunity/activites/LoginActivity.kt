@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
@@ -50,8 +51,7 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                                 val id: String = user.id.toString()
                                 val nickname: String = user.kakaoAccount?.profile?.nickname ?: ""
 
-                                Toast.makeText(this, "$id\n$nickname", Toast.LENGTH_SHORT).show()
-
+                                AlertDialog.Builder(this).setMessage("$id\n$nickname").create().show()
                                 //로그인 되었으니
                                 startActivity(Intent(this, Signup2Activity::class.java))
 //                                intent.putExtra("uid", id)

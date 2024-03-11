@@ -8,6 +8,6 @@ class GlobalApplication: Application() {
         super.onCreate()
 
         //카카오 SDK 초기화 작업
-        KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
+        KakaoSdk.init(this, "${BuildConfig.KAKAO_NATIVE_APP_KEY}")
     }
 }
