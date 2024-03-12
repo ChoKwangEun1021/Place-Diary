@@ -20,8 +20,6 @@ android {
 
         buildConfigField "String", "KAKAO_NATIVE_APP_KEY", "\"${properties.getProperty("KAKAO_NATIVE_APP_KEY")}\""
 
-        manifestPlaceholders = ["KAKAO_NATIVE_APP_KEY": "\"${properties.getProperty("KAKAO_NATIVE_APP_KEY")}\""]
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

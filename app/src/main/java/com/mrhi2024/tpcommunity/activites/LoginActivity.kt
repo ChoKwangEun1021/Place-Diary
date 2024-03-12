@@ -7,7 +7,9 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import com.bumptech.glide.Glide
+import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.mrhi2024.tpcommunity.R
@@ -49,12 +51,14 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                         UserApiClient.instance.me { user, error ->
                             if (user != null) {
                                 val id: String = user.id.toString()
-                                val nickname: String = user.kakaoAccount?.profile?.nickname ?: ""
+//                                val nickname: String = user.kakaoAccount?.profile?.nickname ?: ""
 
-                                AlertDialog.Builder(this).setMessage("$id\n$nickname").create().show()
+//                                AlertDialog.Builder(this).setMessage("$id\n$nickname").create().show()
                                 //로그인 되었으니
-                                startActivity(Intent(this, Signup2Activity::class.java))
-//                                intent.putExtra("uid", id)
+                                val intent = Intent(this, Signup2Activity::class.java)
+                                intent.putExtra("uid", id)
+                                intent.putExtra("login_type", "kakao")
+                                startActivity(intent)
                                 finish()
                             }
                         }
@@ -62,23 +66,30 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                     }
                 }
 
-
-                //카카오톡이 사용가능하면 이를 이용하여 로그인하고 없으면 카카오계정으로 로그인하기
-                if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-                    UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
+                if (AuthApiClient.instance.hasToken()) {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
                 } else {
-                    UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
-                }
 
+                    //카카오톡이 사용가능하면 이를 이용하여 로그인하고 없으면 카카오계정으로 로그인하기
+                    if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
+                        UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
+                    } else {
+                        UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
+                    }
+
+                }
 
             }
 
             R.id.btn_login_naver -> {
                 Toast.makeText(this, "네이버 로그인", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, Signup2Activity::class.java))
             }
 
             R.id.btn_login_google -> {
                 Toast.makeText(this, "구글 로그인", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, Signup2Activity::class.java))
             }
 
             R.id.btn_login -> {

@@ -22,7 +22,8 @@
         android:id="@+id/cv_profile"
         android:layout_width="120dp"
         android:layout_height="100dp"
-        android:src="@drawable/cat2"
+        android:src="@drawable/baseline_person_24"
+        app:civ_border_width="1dp"
         android:layout_below="@id/tv"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp" />
