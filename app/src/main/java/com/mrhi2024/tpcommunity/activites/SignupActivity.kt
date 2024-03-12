@@ -45,10 +45,9 @@ class SignupActivity : AppCompatActivity() {
         } else {
             intent.putExtra("email", email)
             intent.putExtra("password", password)
+            intent.putExtra("login_type", "email")
             startActivity(intent)
         }
-
-
 
     }
 }
