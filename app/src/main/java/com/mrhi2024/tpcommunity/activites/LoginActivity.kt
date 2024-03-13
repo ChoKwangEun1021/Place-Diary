@@ -3,13 +3,11 @@ package com.mrhi2024.tpcommunity.activites
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -20,7 +18,6 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.mrhi2024.tpcommunity.BuildConfig
 import com.mrhi2024.tpcommunity.R
-import com.mrhi2024.tpcommunity.data.Item
 import com.mrhi2024.tpcommunity.data.NaverLogin
 import com.mrhi2024.tpcommunity.databinding.ActivityLoginBinding
 import com.mrhi2024.tpcommunity.network.RetrofitHelper
@@ -33,9 +30,16 @@ import retrofit2.Response
 
 class LoginActivity : AppCompatActivity(), OnClickListener {
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+    private val spf by lazy { getSharedPreferences("loginSave", MODE_PRIVATE) }
+    private val spfEdit by lazy { spf.edit() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        if (spf.getBoolean("isLogin", false)) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
 
         Glide.with(this).load(R.drawable.night).into(binding.ivNight)
 
@@ -45,6 +49,7 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
         binding.btnLoginGoogle.setOnClickListener(this)
         binding.btnLogin.setOnClickListener(this)
         binding.btnSignup.setOnClickListener(this)
+
     }
 
     override fun onClick(v: View?) {
@@ -64,13 +69,12 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                         UserApiClient.instance.me { user, error ->
                             if (user != null) {
                                 val id: String = user.id.toString()
-//                                val nickname: String = user.kakaoAccount?.profile?.nickname ?: ""
-
-//                                AlertDialog.Builder(this).setMessage("$id\n$nickname").create().show()
                                 //로그인 되었으니
                                 val intent = Intent(this, Signup2Activity::class.java)
                                 intent.putExtra("kakao_uid", id)
                                 intent.putExtra("login_type", "kakao")
+                                spfEdit.putBoolean("isLogin", true)
+                                spfEdit.apply()
                                 startActivity(intent)
                                 finish()
                             }
@@ -79,6 +83,7 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                     }
                 }
 
+                //카카오 로그인되어있는기 기록 확인
                 if (AuthApiClient.instance.hasToken()) {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
@@ -104,49 +109,63 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                     "PlaceDiary"
                 )
 
-                //로그인 요청
-                NaverIdLoginSDK.authenticate(this, object : OAuthLoginCallback {
-                    override fun onError(errorCode: Int, message: String) {
-                        Toast.makeText(this@LoginActivity, message, Toast.LENGTH_SHORT).show()
-                    }
+                val account = NaverIdLoginSDK.getAccessToken()
 
-                    override fun onFailure(httpStatus: Int, message: String) {
-                        Toast.makeText(this@LoginActivity, message, Toast.LENGTH_SHORT).show()
-                    }
+                if (account != null) {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                } else {
+                    //로그인 요청
+                    NaverIdLoginSDK.authenticate(this, object : OAuthLoginCallback {
+                        override fun onError(errorCode: Int, message: String) {
+                            Toast.makeText(this@LoginActivity, message, Toast.LENGTH_SHORT).show()
+                        }
 
-                    override fun onSuccess() {
-                        Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
+                        override fun onFailure(httpStatus: Int, message: String) {
+                            Toast.makeText(this@LoginActivity, message, Toast.LENGTH_SHORT).show()
+                        }
 
-                        //사용자 정보를 받아오기 -- REST API로 받아야 함
-                        //로그인에 성공하면 REST API로 요청할 수 있는 토큰(token)을 발급받음
-                        val accessToken: String? = NaverIdLoginSDK.getAccessToken()
+                        override fun onSuccess() {
+                            Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
 
-                        //Retrofit 작업을 통해 사용자 정보 가져오기
-                        val retroift =
-                            RetrofitHelper.getRetrofitInstance("https://openapi.naver.com")
-                        val retrofitApiService = retroift.create(RetrofitService::class.java)
-                        val call = retrofitApiService.getNidUserInfo("Bearer $accessToken")
-                        call.enqueue(object : Callback<String> {
-                            override fun onResponse(
-                                call: Call<String>,
-                                response: Response<String>
-                            ) {
-                                val s = response.body()
-                                AlertDialog.Builder(this@LoginActivity).setMessage(s).create().show()
+                            //사용자 정보를 받아오기 -- REST API로 받아야 함
+                            //로그인에 성공하면 REST API로 요청할 수 있는 토큰(token)을 발급받음
+                            val accessToken: String? = NaverIdLoginSDK.getAccessToken()
 
-//                                startActivity(Intent(this@LoginActivity, Signup2Activity::class.java))
-//                                finish()
-                            }
+                            //Retrofit 작업을 통해 사용자 정보 가져오기
+                            val retroift =
+                                RetrofitHelper.getRetrofitInstance("https://openapi.naver.com")
+                            val retrofitApiService = retroift.create(RetrofitService::class.java)
 
-                            override fun onFailure(call: Call<String>, t: Throwable) {
-                                Toast.makeText(this@LoginActivity, t.message, Toast.LENGTH_SHORT).show()
-                            }
+                            val call = retrofitApiService.getNidUserInfo2("Bearer $accessToken")
+                            call.enqueue(object : Callback<NaverLogin> {
+                                override fun onResponse(
+                                    call: Call<NaverLogin>,
+                                    response: Response<NaverLogin>
+                                ) {
+                                    val intent = Intent(this@LoginActivity, Signup2Activity::class.java)
+                                    val s = response.body()
+                                    val id = s?.response?.id
+                                    val email = s?.response?.email
+                                    intent.putExtra("naver_uid", id)
+                                    intent.putExtra("naver_email", email)
+                                    intent.putExtra("login_type", "naver")
+                                    spfEdit.putBoolean("isLogin", true)
+                                    spfEdit.apply()
+                                    startActivity(intent)
+//                                AlertDialog.Builder(this@LoginActivity).setMessage("$id\n$email").create().show()
+                                }
 
-                        })
+                                override fun onFailure(call: Call<NaverLogin>, t: Throwable) {
+                                    Toast.makeText(this@LoginActivity, t.message, Toast.LENGTH_SHORT).show()
+                                }
 
-                    }
+                            })
 
-                })
+                        }
+
+                    })
+                }//else
 
             }
 
@@ -156,9 +175,18 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                     GoogleSignInOptions.DEFAULT_SIGN_IN
                 ).requestEmail().build()
 
-                //구글 로그인을 하는 화면 액티비티를 실행하는 Intent 객체로 로그인 구현
-                val intent: Intent = GoogleSignIn.getClient(this, signInOptions).signInIntent
-                resultLauncher.launch(intent)
+                //구글 로그인 이력 확인하기
+                val account = GoogleSignIn.getLastSignedInAccount(this)
+                //구글 로그인 상태에 따른 조건문
+                if (account != null) {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                } else {
+                    //구글 로그인을 하는 화면 액티비티를 실행하는 Intent 객체로 로그인 구현
+                    val intent: Intent = GoogleSignIn.getClient(this, signInOptions).signInIntent
+                    resultLauncher.launch(intent)
+                }
+
             }
 
             R.id.btn_login -> {
@@ -192,6 +220,8 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
             intent2.putExtra("google_uid", id)
             intent2.putExtra("google_email", email)
             intent2.putExtra("login_type", "google")
+            spfEdit.putBoolean("isLogin", true)
+            spfEdit.apply()
             startActivity(intent2)
         }
 }

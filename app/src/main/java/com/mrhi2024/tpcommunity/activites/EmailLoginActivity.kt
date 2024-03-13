@@ -9,9 +9,16 @@ import com.mrhi2024.tpcommunity.firebase.FBauth
 
 class EmailLoginActivity : AppCompatActivity() {
     private val binding by lazy { ActivityEmailLoginBinding.inflate(layoutInflater) }
+    private val spf by lazy { getSharedPreferences("loginSave", MODE_PRIVATE) }
+    private val spfEdit by lazy { spf.edit() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        if (spf.getBoolean("isLogin", false)) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
 
 
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -24,6 +31,8 @@ class EmailLoginActivity : AppCompatActivity() {
 
         FBauth.auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
+                spfEdit.putBoolean("isLogin", true)
+                spfEdit.apply()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
                 Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
