@@ -1,6 +1,6 @@
 package com.mrhi2024.tpcommunity.data
 
-data class NaverLogin(val resultcode: String, val message: String, val response: List<Item>)
+data class NaverLogin(val resultcode: String, val message: String, val response: Response)
 
 //data class Item(
 //    val id: String,
@@ -15,4 +15,4 @@ data class NaverLogin(val resultcode: String, val message: String, val response:
 //    val mobile: String
 //)
 
-data class Item(val id: String, val email: String)
+data class Response(val id: String, val email: String)

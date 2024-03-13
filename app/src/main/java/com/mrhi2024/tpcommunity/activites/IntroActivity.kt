@@ -18,8 +18,18 @@ class IntroActivity : AppCompatActivity() {
         Glide.with(this).load(R.drawable.cat2).into(iv)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginActivity::class.java))
+            val intent = if (isLogin()) {
+                Intent(this, MainActivity::class.java)
+            } else {
+                Intent(this, LoginActivity::class.java)
+            }
+            startActivity(intent)
             finish()
         }, 2000)
+    }
+
+    private fun isLogin(): Boolean {
+        val sdf = getSharedPreferences("loginSave", MODE_PRIVATE)
+        return sdf.getBoolean("isLogin", false)
     }
 }

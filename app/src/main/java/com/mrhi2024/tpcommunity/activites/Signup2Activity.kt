@@ -30,9 +30,9 @@ class Signup2Activity : AppCompatActivity() {
         binding.cvProfile.setOnClickListener { getImage() }
         binding.btnRegister.setOnClickListener { clickRegister() }
 
-        val s = intent.getStringExtra("login_type")
-        val s2 = intent.getStringExtra("naver_email")
-        Toast.makeText(this, "$s : $s2", Toast.LENGTH_SHORT).show()
+//        val s = intent.getStringExtra("login_type")
+//        val s2 = intent.getStringExtra("naver_email")
+//        Toast.makeText(this, "$s : $s2", Toast.LENGTH_SHORT).show()
 
     }
 
@@ -76,6 +76,27 @@ class Signup2Activity : AppCompatActivity() {
                         user["uid"] = uid.toString()
                         user["email"] = kakaoEmail
                         user["password"] = "카카오로그인 사용"
+                        user["nickName"] = binding.inputLayoutNickName.editText!!.text.toString()
+
+                        userRef.document().set(user).addOnSuccessListener {
+                            Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    userProfileImgUpload()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }
+
+                "naver" -> {
+                    val uid = intent.getStringExtra("naver_uid")
+                    val naverEmail = intent.getStringExtra("naver_email")
+
+                    userRef.whereEqualTo("email", naverEmail).get().addOnSuccessListener {
+
+                        val user = mutableMapOf<String, String>()
+                        user["uid"] = uid.toString()
+                        user["email"] = naverEmail.toString()
+                        user["password"] = "네이버로그인 사용"
                         user["nickName"] = binding.inputLayoutNickName.editText!!.text.toString()
 
                         userRef.document().set(user).addOnSuccessListener {
@@ -154,6 +175,18 @@ class Signup2Activity : AppCompatActivity() {
                         }
                     }
 
+                }
+
+                "naver" -> {
+                    name = intent.getStringExtra("naver_uid").toString()
+
+                    val imgRef: StorageReference = Firebase.storage.getReference("userImg/$name")
+
+                    imgUri?.apply {
+                        imgRef.putFile(this).addOnSuccessListener {
+                            Log.d("img upload", "이미지 업로드 성공")
+                        }
+                    }
                 }
 
                 "google" -> {
