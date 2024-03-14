@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.mrhi2024.tpcommunity.databinding.ActivityEmailLoginBinding
-import com.mrhi2024.tpcommunity.firebase.FBauth
+import com.mrhi2024.tpcommunity.firebase.FBAuth
 
 class EmailLoginActivity : AppCompatActivity() {
     private val binding by lazy { ActivityEmailLoginBinding.inflate(layoutInflater) }
@@ -29,7 +29,7 @@ class EmailLoginActivity : AppCompatActivity() {
         val email = binding.inputLayoutEmail.editText!!.text.toString()
         val password = binding.inputLayoutPassword.editText!!.text.toString()
 
-        FBauth.auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
+        FBAuth.auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
                 spfEdit.putBoolean("isLogin", true)
                 spfEdit.apply()

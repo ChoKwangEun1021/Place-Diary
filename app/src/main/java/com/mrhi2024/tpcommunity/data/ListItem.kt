@@ -5,12 +5,12 @@ data class ListItem(
     val tvName2: String,
     val tvContent: String,
     val ivProfile: Int,
-    val tvLike: String,
+//    val tvLike: String,
     val tvLikeCount: Int,
-    val tvChat: String,
+//    val tvChat: String,
     val tvChatCount: Int,
-    val ivList: Int,
+//    val ivList: Int,
     val ivContent: Int,
     val ivFavorite: Int,
-    val ivChat: Int
+//    val ivChat: Int
 )

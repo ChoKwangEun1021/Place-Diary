@@ -29,7 +29,7 @@ class IntroActivity : AppCompatActivity() {
     }
 
     private fun isLogin(): Boolean {
-        val sdf = getSharedPreferences("loginSave", MODE_PRIVATE)
-        return sdf.getBoolean("isLogin", false)
+        val spf = getSharedPreferences("loginSave", MODE_PRIVATE)
+        return spf.getBoolean("isLogin", false)
     }
 }

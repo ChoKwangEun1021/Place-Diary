@@ -11,28 +11,29 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
+import com.mrhi2024.tpcommunity.G
+import com.mrhi2024.tpcommunity.data.User
 import com.mrhi2024.tpcommunity.databinding.ActivitySignup2Binding
-import com.mrhi2024.tpcommunity.firebase.FBauth
 
 class Signup2Activity : AppCompatActivity() {
     private val binding by lazy { ActivitySignup2Binding.inflate(layoutInflater) }
 
-//    private lateinit var nickName: String
     private var imgUri: Uri? = null
+    private lateinit var nickName: String
+    private val auth by lazy { Firebase.auth }
+    private val spf by lazy { getSharedPreferences("loginInfo", MODE_PRIVATE) }
+    private val spfEdit by lazy { spf.edit() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.cvProfile.setOnClickListener { getImage() }
         binding.btnRegister.setOnClickListener { clickRegister() }
-
-//        val s = intent.getStringExtra("login_type")
-//        val s2 = intent.getStringExtra("naver_email")
-//        Toast.makeText(this, "$s : $s2", Toast.LENGTH_SHORT).show()
 
     }
 
@@ -61,8 +62,7 @@ class Signup2Activity : AppCompatActivity() {
 
     private fun signUp() {
         val userRef = Firebase.firestore.collection("users")
-
-//        nickName = binding.inputLayoutNickName.editText!!.text.toString()
+        nickName = binding.inputLayoutNickName.editText!!.text.toString()
 
         if (intent != null && intent.hasExtra("login_type")) {
             when (intent.getStringExtra("login_type")) {
@@ -76,7 +76,13 @@ class Signup2Activity : AppCompatActivity() {
                         user["uid"] = uid.toString()
                         user["email"] = kakaoEmail
                         user["password"] = "카카오로그인 사용"
-                        user["nickName"] = binding.inputLayoutNickName.editText!!.text.toString()
+                        user["nickName"] = nickName
+
+                        spfEdit.putString("uid", uid)
+                        spfEdit.putString("nickName", nickName)
+                        spfEdit.apply()
+
+                        G.userAccount = User(uid.toString(),nickName)
 
                         userRef.document().set(user).addOnSuccessListener {
                             Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
@@ -97,7 +103,13 @@ class Signup2Activity : AppCompatActivity() {
                         user["uid"] = uid.toString()
                         user["email"] = naverEmail.toString()
                         user["password"] = "네이버로그인 사용"
-                        user["nickName"] = binding.inputLayoutNickName.editText!!.text.toString()
+                        user["nickName"] = nickName
+
+                        spfEdit.putString("uid", uid)
+                        spfEdit.putString("nickName", nickName)
+                        spfEdit.apply()
+
+                        G.userAccount = User(uid.toString(),nickName)
 
                         userRef.document().set(user).addOnSuccessListener {
                             Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
@@ -117,7 +129,13 @@ class Signup2Activity : AppCompatActivity() {
                         user["uid"] = uid.toString()
                         user["email"] = googleEmail
                         user["password"] = "구글로그인 사용"
-                        user["nickName"] = binding.inputLayoutNickName.editText!!.text.toString()
+                        user["nickName"] = nickName
+
+                        spfEdit.putString("uid", uid)
+                        spfEdit.putString("nickName", nickName)
+                        spfEdit.apply()
+
+                        G.userAccount = User(uid.toString(),nickName)
 
                         userRef.document().set(user).addOnSuccessListener {
                             Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
@@ -131,16 +149,23 @@ class Signup2Activity : AppCompatActivity() {
                 "email" -> {
                     val email3 = intent.getStringExtra("email").toString()
                     val password = intent.getStringExtra("password")
+                    val uid = auth.currentUser?.uid.toString()
 
-                    FBauth.auth.createUserWithEmailAndPassword(email3, password!!)
+                    auth.createUserWithEmailAndPassword(email3, password!!)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 userRef.whereEqualTo("email", email3).get().addOnSuccessListener {
                                     val user = mutableMapOf<String, String>()
-                                    user["uid"] = FBauth.getUid()
+                                    user["uid"] = uid
                                     user["email"] = email3
                                     user["password"] = password
-                                    user["nickName"] = binding.inputLayoutNickName.editText!!.text.toString()
+                                    user["nickName"] = nickName
+
+                                    spfEdit.putString("uid", uid)
+                                    spfEdit.putString("nickName", nickName)
+                                    spfEdit.apply()
+
+                                    G.userAccount = User(uid,nickName)
 
                                     userRef.document().set(user).addOnSuccessListener {
                                         Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
@@ -202,7 +227,7 @@ class Signup2Activity : AppCompatActivity() {
                 }
 
                 "email" -> {
-                    name = FBauth.getUid()
+                    name = auth.currentUser?.uid.toString()
 
                     val imgRef: StorageReference = Firebase.storage.getReference("userImg/$name")
 
