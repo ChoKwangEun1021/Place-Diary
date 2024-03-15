@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.mrhi2024.tpcommunity.G
 import com.mrhi2024.tpcommunity.R
 
 class IntroActivity : AppCompatActivity() {
@@ -15,6 +16,9 @@ class IntroActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_intro)
 
+        val spf = getSharedPreferences("loginInfo", MODE_PRIVATE)
+        G.userUid = spf.getString("uid", "").toString()
+        G.userNickname = spf.getString("nickName", "").toString()
         Glide.with(this).load(R.drawable.cat2).into(iv)
 
         Handler(Looper.getMainLooper()).postDelayed({

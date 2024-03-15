@@ -82,8 +82,6 @@ class Signup2Activity : AppCompatActivity() {
                         spfEdit.putString("nickName", nickName)
                         spfEdit.apply()
 
-                        G.userAccount = User(uid.toString(),nickName)
-
                         userRef.document().set(user).addOnSuccessListener {
                             Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
                         }
@@ -109,8 +107,6 @@ class Signup2Activity : AppCompatActivity() {
                         spfEdit.putString("nickName", nickName)
                         spfEdit.apply()
 
-                        G.userAccount = User(uid.toString(),nickName)
-
                         userRef.document().set(user).addOnSuccessListener {
                             Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
                         }
@@ -134,8 +130,6 @@ class Signup2Activity : AppCompatActivity() {
                         spfEdit.putString("uid", uid)
                         spfEdit.putString("nickName", nickName)
                         spfEdit.apply()
-
-                        G.userAccount = User(uid.toString(),nickName)
 
                         userRef.document().set(user).addOnSuccessListener {
                             Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
@@ -164,8 +158,6 @@ class Signup2Activity : AppCompatActivity() {
                                     spfEdit.putString("uid", uid)
                                     spfEdit.putString("nickName", nickName)
                                     spfEdit.apply()
-
-                                    G.userAccount = User(uid,nickName)
 
                                     userRef.document().set(user).addOnSuccessListener {
                                         Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()

@@ -11,6 +11,5 @@ class FBRef {
 
         val userRef = fs.collection("users")
         val boardRef = fs.collection("board")
-        val profileImgRef = Firebase.storage.getReference()
     }
 }

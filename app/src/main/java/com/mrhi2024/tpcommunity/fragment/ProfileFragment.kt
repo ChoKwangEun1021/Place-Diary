@@ -30,12 +30,12 @@ class ProfileFragment : Fragment() {
     ): View? {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
 
-        val imgUrl = Firebase.storage.getReference("userImg/${spf?.getString("uid", null)}")
+        val imgUrl = Firebase.storage.getReference("userImg/${G.userUid}")
         imgUrl.downloadUrl.addOnSuccessListener {
             Glide.with(requireContext()).load(it).into(binding.ivProfile)
         }
 
-        binding.tvName.text = spf?.getString("nickName", null)
+        binding.tvName.text = G.userNickname
 
 //        val naverAccount = NaverIdLoginSDK.getAccessToken()
 //        val googleAccount = GoogleSignIn.getLastSignedInAccount(requireContext())
@@ -64,6 +64,6 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-//        AlertDialog.Builder(requireContext()).setMessage("${G.userAccount?.uid}\n${G.userAccount?.nickName}").create().show()
+//        AlertDialog.Builder(requireContext()).setMessage("${G.userUid}\n${G.userNickname}").create().show()
     }
 }
