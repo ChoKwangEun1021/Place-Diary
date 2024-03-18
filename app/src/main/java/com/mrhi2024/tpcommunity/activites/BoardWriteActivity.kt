@@ -6,15 +6,14 @@ import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.google.gson.Gson
 import com.mrhi2024.tpcommunity.G
-import com.mrhi2024.tpcommunity.adapter.BoardWritePagerAdapter
 import com.mrhi2024.tpcommunity.databinding.ActivityBoardWriteBinding
 import com.mrhi2024.tpcommunity.firebase.FBRef
 import java.text.SimpleDateFormat
@@ -23,7 +22,7 @@ import java.util.Locale
 
 class BoardWriteActivity : AppCompatActivity() {
     private val binding by lazy { ActivityBoardWriteBinding.inflate(layoutInflater) }
-    private var imgUri: Uri? = null
+//    private var imgUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -47,7 +46,8 @@ class BoardWriteActivity : AppCompatActivity() {
             }
         } else {
             val intent = Intent(this, BoardWriteImgDetailActivity::class.java)
-//            intent.putExtra("imgs", imgs.toString())
+            val imgsG = Gson().toJson(imgs)
+            intent.putExtra("imgs", imgsG)
             startActivity(intent)
         }
 
@@ -71,7 +71,6 @@ class BoardWriteActivity : AppCompatActivity() {
 
             Glide.with(this).load(imgs[0]).into(binding.ivBoard)
 
-//            binding.pager.adapter = BoardWritePagerAdapter(this, imgs)
         }
 
     private val resultLauncher =
@@ -79,21 +78,20 @@ class BoardWriteActivity : AppCompatActivity() {
 //            imgUri = it.data?.data
 //            Glide.with(this).load(imgUri).into(binding.ivBoard)
 
-//            if (it.resultCode == RESULT_CANCELED) {
-//                Toast.makeText(this, "이미지를 선택하지 않았습니다", Toast.LENGTH_SHORT).show()
-//            } else {
-//                imgs.clear()
-//                //1개만 선택했을때는 uri data로 전달받음
-//                if (it.data?.data != null) {
-//                    imgs.add(it.data?.data)
-//                } else { //2개 이상일때는 ClipData 라는 것으로 여러 파일들의 정보를 받음
-//                    val cnt: Int = it.data?.clipData?.itemCount!!
-//                    for (i in 0 until cnt) {
-//                        imgs.add(it.data?.clipData?.getItemAt(i)?.uri)
-//                    }
-//                }
-//                binding.pager.adapter = BoardWritePagerAdapter(this, imgs)
-//            }
+            if (it.resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "이미지를 선택하지 않았습니다", Toast.LENGTH_SHORT).show()
+            } else {
+                imgs.clear()
+                //1개만 선택했을때는 uri data로 전달받음
+                if (it.data?.data != null) {
+                    imgs.add(it.data?.data)
+                } else { //2개 이상일때는 ClipData 라는 것으로 여러 파일들의 정보를 받음
+                    val cnt: Int = it.data?.clipData?.itemCount!!
+                    for (i in 0 until cnt) {
+                        imgs.add(it.data?.clipData?.getItemAt(i)?.uri)
+                    }
+                }
+            }
 
         }
 
@@ -103,6 +101,7 @@ class BoardWriteActivity : AppCompatActivity() {
         board["title"] = binding.editTextTitle.text.toString()
         board["content"] = binding.inputLayoutContent.editText!!.text.toString()
         board["boardUid"] = G.userUid
+        board["nickName"] = G.userNickname
 
         FBRef.boardRef.document().set(board).addOnSuccessListener {
             Toast.makeText(this, "작성 완료", Toast.LENGTH_SHORT).show()
@@ -112,13 +111,17 @@ class BoardWriteActivity : AppCompatActivity() {
     }
 
     private fun boardImgUpload() {
-        val fileName = "IMG_" + SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(Date())
         val name = G.userUid
 
-        val imgRef = Firebase.storage.getReference("boardImg/${fileName}$name")
-        imgUri?.apply {
-            imgRef.putFile(this).addOnSuccessListener {
-                Toast.makeText(this@BoardWriteActivity, "이미지 업로드 완료", Toast.LENGTH_SHORT).show()
+        imgs.apply {
+            for (i in 0 until imgs.size) {
+                this[i]?.let {
+//                    val fileName = "IMG_" + SimpleDateFormat("yyyyMMddHHmmss${i}", Locale.KOREA).format(Date())
+                    val imgRef = Firebase.storage.getReference("boardImg/$name${i}")
+                    imgRef.putFile(it).addOnSuccessListener {
+//                        Toast.makeText(this@BoardWriteActivity, "이미지 업로드 완료", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }

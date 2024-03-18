@@ -1,5 +1,7 @@
 package com.mrhi2024.tpcommunity.data
 
+import android.net.Uri
+
 data class ListItem(
     val tvName: String,
     val tvName2: String,
@@ -14,3 +16,5 @@ data class ListItem(
     val ivFavorite: Int,
 //    val ivChat: Int
 )
+
+data class BoardImgs(val imgsUri: List<Uri?>)
