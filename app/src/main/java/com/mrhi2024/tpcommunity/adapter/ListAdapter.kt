@@ -28,7 +28,7 @@ class ListAdapter(val context: Context, val itemList: List<Board>): Adapter<List
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = itemList[position]
 
-        val userImgUrl = Firebase.storage.getReference("userImg/${G.userUid}")
+        val userImgUrl = Firebase.storage.getReference("userImg/${item.uid}")
         userImgUrl.downloadUrl.addOnSuccessListener {
             Glide.with(context).load(it).into(holder.binding.ivProfile)
         }
@@ -36,7 +36,7 @@ class ListAdapter(val context: Context, val itemList: List<Board>): Adapter<List
 
         holder.binding.tvName.text = item.nickName
 //        Glide.with(context).load(item.ivList).into(holder.binding.ivList)
-        val boardImgUrl = Firebase.storage.getReference("boardImg/${G.userUid}0")
+        val boardImgUrl = Firebase.storage.getReference("boardImg/${item.imgUrl}")
         boardImgUrl.downloadUrl.addOnSuccessListener {
             Glide.with(context).load(it).into(holder.binding.ivContent)
         }

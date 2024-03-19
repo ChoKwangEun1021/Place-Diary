@@ -19,6 +19,7 @@ import com.google.firebase.storage.ktx.storage
 import com.mrhi2024.tpcommunity.G
 import com.mrhi2024.tpcommunity.data.User
 import com.mrhi2024.tpcommunity.databinding.ActivitySignup2Binding
+import com.mrhi2024.tpcommunity.firebase.FBAuth
 
 class Signup2Activity : AppCompatActivity() {
     private val binding by lazy { ActivitySignup2Binding.inflate(layoutInflater) }
@@ -145,6 +146,9 @@ class Signup2Activity : AppCompatActivity() {
                     val password = intent.getStringExtra("password")
                     val uid = auth.currentUser?.uid.toString()
 
+                    val spf2 = getSharedPreferences("loginSave", MODE_PRIVATE)
+                    val spfEdit2 = spf2.edit()
+
                     auth.createUserWithEmailAndPassword(email3, password!!)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
@@ -163,9 +167,20 @@ class Signup2Activity : AppCompatActivity() {
                                         Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
                                     }
                                 }
+                                FBAuth.auth.signInWithEmailAndPassword(email3, password).addOnCompleteListener {
+                                    if (it.isSuccessful) {
+                                        spfEdit2.putBoolean("isLogin", true)
+                                        spfEdit2.apply()
+                                        startActivity(Intent(this, MainActivity::class.java))
+                                        finish()
+                                        Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(this, "로그인 실패", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                                 userProfileImgUpload()
-                                startActivity(Intent(this, MainActivity::class.java))
-                                finish()
+//                                startActivity(Intent(this, MainActivity::class.java))
+//                                finish()
                             } else {
                                 Log.d("create error", "${it.exception?.message}")
                                 Toast.makeText(this, "회원가입 실패", Toast.LENGTH_SHORT).show()

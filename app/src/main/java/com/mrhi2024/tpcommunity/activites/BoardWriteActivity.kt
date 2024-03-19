@@ -95,6 +95,8 @@ class BoardWriteActivity : AppCompatActivity() {
 
         }
 
+    val fileName = "IMG_" + SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(Date())
+    val documentName = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(Date())
     private fun clickSave() {
         val board = mutableMapOf<String, String>()
 
@@ -102,22 +104,32 @@ class BoardWriteActivity : AppCompatActivity() {
         board["content"] = binding.inputLayoutContent.editText!!.text.toString()
         board["boardUid"] = G.userUid
         board["nickName"] = G.userNickname
+        board["imgUrl"] = fileName
 
-        FBRef.boardRef.document().set(board).addOnSuccessListener {
-            Toast.makeText(this, "작성 완료", Toast.LENGTH_SHORT).show()
+        if (binding.ivBoard.drawable is VectorDrawable) {
+            Toast.makeText(this, "사진을 선택해주세요!", Toast.LENGTH_SHORT).show()
+            return
+        } else if (binding.editTextTitle.text.toString().isEmpty() && binding.inputLayoutContent.editText!!.text.toString().isNullOrEmpty()) {
+            Toast.makeText(this, "제목 또는 게시글 내용을 입력해주세요!", Toast.LENGTH_SHORT).show()
+            return
+        } else {
+            FBRef.boardRef.document(documentName).set(board).addOnSuccessListener {
+                Toast.makeText(this, "작성 완료", Toast.LENGTH_SHORT).show()
+            }
+            boardImgUpload()
+            startActivity(Intent(this, MainActivity::class.java))
         }
-        boardImgUpload()
-        startActivity(Intent(this, MainActivity::class.java))
+
     }
 
     private fun boardImgUpload() {
-        val name = G.userUid
+//        val name = G.userUid
 
         imgs.apply {
             for (i in 0 until imgs.size) {
                 this[i]?.let {
-//                    val fileName = "IMG_" + SimpleDateFormat("yyyyMMddHHmmss${i}", Locale.KOREA).format(Date())
-                    val imgRef = Firebase.storage.getReference("boardImg/$name${i}")
+//                    val fileName = "IMG_" + SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(Date())
+                    val imgRef = Firebase.storage.getReference("boardImg/${fileName}")
                     imgRef.putFile(it).addOnSuccessListener {
 //                        Toast.makeText(this@BoardWriteActivity, "이미지 업로드 완료", Toast.LENGTH_SHORT).show()
                     }

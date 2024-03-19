@@ -1,5 +1,6 @@
 package com.mrhi2024.tpcommunity.fragment
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,6 +20,7 @@ import com.mrhi2024.tpcommunity.adapter.ListAdapter
 import com.mrhi2024.tpcommunity.data.Board
 import com.mrhi2024.tpcommunity.data.ListItem
 import com.mrhi2024.tpcommunity.databinding.FragmentListBinding
+import com.mrhi2024.tpcommunity.firebase.FBRef
 
 class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
@@ -31,55 +33,56 @@ class ListFragment : Fragment() {
     ): View? {
         binding = FragmentListBinding.inflate(inflater, container, false)
 
-        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
-//        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
 //        listItem.add(0, Board("둥이", "이 내용은 테스트용", "이 내용은 테스트중입니다!!", 77, 56))
 
-        getBoard()
         binding.recyclerListFragment.adapter = ListAdapter(requireContext(), listItem)
+        getBoard()
         return binding.root
     }
 
-    private fun getBoard() {
-        val boardRef = Firebase.firestore.collection("board")
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        boardRef.get().addOnSuccessListener {
+        binding.fab.setOnClickListener {
+            startActivity(Intent(requireContext(), BoardWriteActivity::class.java))
+        }
+
+        binding.refreshLayout.setOnRefreshListener {
+            binding.recyclerListFragment.adapter!!.notifyDataSetChanged()
+            binding.refreshLayout.isRefreshing = false
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun getBoard() {
+
+        FBRef.boardRef.get().addOnSuccessListener {
             for (snapshot: DocumentSnapshot in it) {
                 val data = snapshot.data!!
                 val nickName = data["nickName"].toString()
                 val content = data["content"].toString()
                 val title = data["title"].toString()
-                listItem.add(0, Board(nickName, title, content))
+                val uid = data["boardUid"].toString()
+                val imgUrl = data["imgUrl"].toString()
+                listItem.add(Board(nickName, uid, title, content, imgUrl = imgUrl))
 
 //                val item = snapshot.toObject(Board::class.java)
+//                if (item != null) {
+//                    listItem.add(item)
+//                }
+
 //                AlertDialog.Builder(requireContext()).setMessage("$listItem").create().show()
             }
+            listItem.reverse()
+            binding.recyclerListFragment.adapter!!.notifyDataSetChanged()
 
         }
 
-//        binding.recyclerListFragment.adapter = ListAdapter(requireContext(), listItem)
-
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-        binding.fab.setOnClickListener {
-            startActivity(
-                Intent(
-                    requireContext(),
-                    BoardWriteActivity::class.java
-                )
-            )
-        }
-
-        binding.recyclerListFragment.adapter!!.notifyDataSetChanged()
-
-
-    }
 }
