@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.DocumentSnapshot
@@ -16,6 +17,7 @@ import com.google.firebase.storage.ktx.storage
 import com.mrhi2024.tpcommunity.G
 import com.mrhi2024.tpcommunity.R
 import com.mrhi2024.tpcommunity.activites.BoardWriteActivity
+import com.mrhi2024.tpcommunity.activites.LoginActivity
 import com.mrhi2024.tpcommunity.adapter.ListAdapter
 import com.mrhi2024.tpcommunity.data.Board
 import com.mrhi2024.tpcommunity.data.ListItem
@@ -44,7 +46,18 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         binding.fab.setOnClickListener {
-            startActivity(Intent(requireContext(), BoardWriteActivity::class.java))
+            if (isLogin()) {
+                startActivity(Intent(requireContext(), BoardWriteActivity::class.java))
+            } else {
+                AlertDialog.Builder(requireContext()).setTitle("로그인 확인").setMessage("로그인을 해주셔야 이용 가능합니다!!")
+                    .setPositiveButton("확인") { dialog, id ->
+                        startActivity(Intent(requireContext(), LoginActivity::class.java))
+                        activity?.finish()
+                    }.setNegativeButton("취소") { dialog, id ->
+                        dialog.dismiss()
+                    }.create().show()
+            }
+
         }
 
         binding.refreshLayout.setOnRefreshListener {
@@ -83,6 +96,11 @@ class ListFragment : Fragment() {
 
         }
 
+    }
+
+    private fun isLogin(): Boolean {
+        val spf = requireContext().getSharedPreferences("loginSave", AppCompatActivity.MODE_PRIVATE)
+        return spf.getBoolean("isLogin", false)
     }
 
 }

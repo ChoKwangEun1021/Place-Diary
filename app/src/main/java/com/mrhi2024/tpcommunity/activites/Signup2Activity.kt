@@ -144,15 +144,15 @@ class Signup2Activity : AppCompatActivity() {
                 "email" -> {
                     val email3 = intent.getStringExtra("email").toString()
                     val password = intent.getStringExtra("password")
-                    val uid = auth.currentUser?.uid.toString()
 
                     val spf2 = getSharedPreferences("loginSave", MODE_PRIVATE)
                     val spfEdit2 = spf2.edit()
 
-                    auth.createUserWithEmailAndPassword(email3, password!!)
+                    FBAuth.auth.createUserWithEmailAndPassword(email3, password!!)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 userRef.whereEqualTo("email", email3).get().addOnSuccessListener {
+                                    val uid = auth.currentUser?.uid.toString()
                                     val user = mutableMapOf<String, String>()
                                     user["uid"] = uid
                                     user["email"] = email3
@@ -163,6 +163,7 @@ class Signup2Activity : AppCompatActivity() {
                                     spfEdit.putString("nickName", nickName)
                                     spfEdit.apply()
 
+//                                    Log.d("uid nickName check", "${uid} : $nickName")
                                     userRef.document().set(user).addOnSuccessListener {
                                         Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show()
                                     }

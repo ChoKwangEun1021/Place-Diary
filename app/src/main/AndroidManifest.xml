@@ -69,6 +69,12 @@
                     android:scheme="@string/kakao_native_app_key" />
             </intent-filter>
         </activity>
+
+        <!-- 카카오 지도 네이티브 앱키 등록 -->
+        <meta-data
+            android:name="com.kakao.vectormap.APP_KEY"
+            android:value="@string/kakao_native_app_key"/>
+
     </application>
 
 </manifest>

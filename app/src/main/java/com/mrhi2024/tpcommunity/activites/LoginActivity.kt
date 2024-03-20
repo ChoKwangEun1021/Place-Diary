@@ -20,6 +20,7 @@ import com.mrhi2024.tpcommunity.BuildConfig
 import com.mrhi2024.tpcommunity.R
 import com.mrhi2024.tpcommunity.data.NaverLogin
 import com.mrhi2024.tpcommunity.databinding.ActivityLoginBinding
+import com.mrhi2024.tpcommunity.firebase.FBRef
 import com.mrhi2024.tpcommunity.network.RetrofitHelper
 import com.mrhi2024.tpcommunity.network.RetrofitService
 import com.navercorp.nid.NaverIdLoginSDK
@@ -115,6 +116,7 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
+
                     //로그인 요청
                     NaverIdLoginSDK.authenticate(this, object : OAuthLoginCallback {
                         override fun onError(errorCode: Int, message: String) {
@@ -152,6 +154,17 @@ class LoginActivity : AppCompatActivity(), OnClickListener {
                                     intent.putExtra("login_type", "naver")
                                     spfEdit.putBoolean("isLogin", true)
                                     spfEdit.apply()
+
+//                                    FBRef.userRef.whereEqualTo("uid", id).get().addOnSuccessListener {
+//                                        it.forEach {
+//                                            val data = it.data
+//                                            val uid = data["uid"].toString()
+//                                            val nickName = data["nickName"].toString()
+//
+//
+//                                        }
+//                                    }
+
                                     startActivity(intent)
 //                                AlertDialog.Builder(this@LoginActivity).setMessage("$id\n$email").create().show()
                                 }

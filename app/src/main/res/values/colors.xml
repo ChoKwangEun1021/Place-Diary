@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="primaryColor">#90D7FD</color>
     <color name="btnPrimaryColor">#EFEFEF</color>
+    <color name="transparent1">#00000000</color>
 </resources>

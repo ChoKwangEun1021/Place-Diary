@@ -1,14 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="MAP FRAGMENT"
-        android:gravity="center"
-        android:textAlignment="center"/>
+<!--    <com.kakao.vectormap.MapView-->
+<!--        android:id="@+id/map_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent" />-->
 
-</LinearLayout>
+    <RelativeLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+<!--        <com.kakao.vectormap.MapView-->
+<!--            android:id="@+id/mapView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent" />-->
+
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="310dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/ic_vector_edittext_rounded_corner_rectangle"
+            android:ems="13"
+            android:hint="  예) 서울역"
+            android:imeOptions="actionDone"
+            android:inputType="textPersonName"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btn_search"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:padding="10dp"
+            android:backgroundTint="@color/primaryColor"
+            android:text="검색"
+            android:textColor="@color/white"
+            android:layout_toEndOf="@id/et_search"/>
+
+        <ImageButton
+            android:id="@+id/btn_target"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/transparent1"
+            android:focusableInTouchMode="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_my_location_24"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/btn_search"/>
+
+        <ImageButton
+            android:id="@+id/btn_addMaker"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
+            android:adjustViewBounds="true"
+            android:background="@color/transparent1"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_add_location_alt_24"
+            android:layout_below="@id/btn_target"
+            android:layout_alignParentEnd="true"/>
+
+
+    </RelativeLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

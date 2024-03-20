@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.mrhi2024.tpcommunity.G
 import com.mrhi2024.tpcommunity.R
 import com.mrhi2024.tpcommunity.databinding.ActivityMainBinding
 import com.mrhi2024.tpcommunity.fragment.HomeFragment
@@ -14,7 +15,7 @@ import com.mrhi2024.tpcommunity.fragment.ProfileFragment
 
 class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private val spf by lazy { getSharedPreferences("loginSave", MODE_PRIVATE) }
+    private val spf by lazy { getSharedPreferences("loginInfo", MODE_PRIVATE) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -42,6 +43,9 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
+        G.userUid = spf.getString("uid", "").toString()
+        G.userNickname = spf.getString("nickName", "").toString()
     }
 
     private fun isLogin(): Boolean {
