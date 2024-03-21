@@ -20,7 +20,11 @@ interface RetrofitService {
 
     //카카오 로컬 검색 api요청해주는 코드 만들어줘 우선 응답 type : KakaoSearchPlaceResponse
     @Headers("Authorization: KakaoAK ${BuildConfig.KAKAO_REST_API_KEY}")
-    @GET("/v2/local/search/keyword.json?sort=distance")
-    fun searchPlace(@Query("query") query: String, @Query("x") longitude: String, @Query("y") latitude: String, @Query("page") page: Int) : Call<KakaoSearch>
+    @GET("/v2/local/search/keyword.json")
+    fun searchPlace(@Query("query") query: String, @Query("page") page: Int) : Call<KakaoSearch>
+
+    @Headers("Authorization: KakaoAK 72a873eed91d11f29c92c2acbbb6d6ac")
+    @GET("/v2/local/search/keyword.json")
+    fun searchPlace2(@Query("query") query: String) : Call<String>
 
 }

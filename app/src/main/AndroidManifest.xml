@@ -9,7 +9,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
     <application
@@ -24,6 +25,9 @@
         android:theme="@style/Theme.TPCommunity"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".activites.PlaceDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".activites.BoardWriteImgDetailActivity"
             android:exported="false" />
@@ -68,13 +72,10 @@
                     android:host="oauth"
                     android:scheme="@string/kakao_native_app_key" />
             </intent-filter>
-        </activity>
-
-        <!-- 카카오 지도 네이티브 앱키 등록 -->
+        </activity> <!-- 카카오 지도 네이티브 앱키 등록 -->
         <meta-data
             android:name="com.kakao.vectormap.APP_KEY"
-            android:value="@string/kakao_native_app_key"/>
-
+            android:value="@string/kakao_native_app_key2" />
     </application>
 
 </manifest>
