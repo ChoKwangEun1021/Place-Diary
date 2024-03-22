@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -83,6 +84,8 @@ class MapFragment : Fragment(), OnClickListener {
     private val longitude: Double = myLocation?.longitude ?: 126.9782
     private val myPos: LatLng = LatLng.from(latitude, longitude)
 
+    private val adapter by lazy { MapSearchAdapter(requireContext(), searchList) }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -109,7 +112,7 @@ class MapFragment : Fragment(), OnClickListener {
 
         binding.mapView.start(mapLifiCycleCallback, mapReadyCallback)
 
-        binding.rvList.adapter = MapSearchAdapter(requireContext(), searchList)
+        binding.rvList.adapter = adapter
 
 //        binding.btnSearch.setOnClickListener { }
         binding.btnPrevPage.setOnClickListener(this)
@@ -243,11 +246,6 @@ class MapFragment : Fragment(), OnClickListener {
                 searchQuery = binding.etSearch.text.toString()
                 pageNumber = 1
                 search(searchQuery, pageNumber)
-                inputMethodManager.hideSoftInputFromWindow(binding.btnSearch.windowToken, 0)
-                bottomSheetBehavior.state =
-                    if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_HALF_EXPANDED
-                    else BottomSheetBehavior.STATE_COLLAPSED
-
                 //주변 검색 장소들에 마커 추가하기
                 val placeList: List<Place>? = searchPlaceResponse?.documents
                 placeList?.forEach {
@@ -257,6 +255,12 @@ class MapFragment : Fragment(), OnClickListener {
                         .setTexts(it.place_name, it.road_address_name).setTag(it)
                     p0.labelManager!!.layer!!.addLabel(options)
                 }
+                inputMethodManager.hideSoftInputFromWindow(binding.btnSearch.windowToken, 0)
+                bottomSheetBehavior.state =
+                    if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_HALF_EXPANDED
+                    else BottomSheetBehavior.STATE_COLLAPSED
+
+
             }
 
             //라벨 클릭에 반응하기
@@ -301,15 +305,18 @@ class MapFragment : Fragment(), OnClickListener {
                 startActivity(intent)
             }
 
-//            MapSearchAdapter(requireContext(), searchList).setItemClickListener(object : MapSearchAdapter.OnItemClickListener {
-//                override fun onClick(v: View?, position: Int) {
-//                    val labelPos = LatLng.from(searchList[position].y, searchList[position].x)
-//                    val cameraUpdate2: CameraUpdate = CameraUpdateFactory.newCenterPosition(labelPos, 16)
-//                    p0.moveCamera(cameraUpdate2)
-//                }
-//
-//            })
+            adapter.setOnItemClickListner(object : MapSearchAdapter.OnItemClickListner {
+                override fun onItemClick(view: View?, position: Int) {
+                    val labelPos = LatLng.from(
+                        searchList[position].y,
+                        searchList[position].x
+                    )
+                    val cameraUpdate2: CameraUpdate =
+                        CameraUpdateFactory.newCenterPosition(labelPos, 16)
+                    p0.moveCamera(cameraUpdate2)
+                }
 
+            })
 
         }
 
