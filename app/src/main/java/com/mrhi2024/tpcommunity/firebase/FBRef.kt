@@ -11,5 +11,6 @@ class FBRef {
 
         val userRef = fs.collection("users")
         val boardRef = fs.collection("board")
+        val labelRef = fs.collection("labels")
     }
 }

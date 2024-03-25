@@ -84,12 +84,6 @@ class ListFragment : Fragment() {
                 val imgUrl = data["imgUrl"].toString()
                 listItem.add(Board(nickName, uid, title, content, imgUrl = imgUrl))
 
-//                val item = snapshot.toObject(Board::class.java)
-//                if (item != null) {
-//                    listItem.add(item)
-//                }
-
-//                AlertDialog.Builder(requireContext()).setMessage("$listItem").create().show()
             }
             listItem.reverse()
             binding.recyclerListFragment.adapter!!.notifyDataSetChanged()

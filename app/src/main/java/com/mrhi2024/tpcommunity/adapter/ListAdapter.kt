@@ -1,6 +1,7 @@
 package com.mrhi2024.tpcommunity.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
@@ -10,6 +11,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.mrhi2024.tpcommunity.G
 import com.mrhi2024.tpcommunity.R
+import com.mrhi2024.tpcommunity.activites.BoardDetailActivity
 import com.mrhi2024.tpcommunity.data.Board
 import com.mrhi2024.tpcommunity.data.ListItem
 import com.mrhi2024.tpcommunity.databinding.RecyclerListFragmentItemBinding
@@ -49,6 +51,17 @@ class ListAdapter(val context: Context, val itemList: List<Board>): Adapter<List
         holder.binding.tvContent.text = item.content
 //        holder.binding.tvChat.text = item.tvChat
         holder.binding.tvCommentCount.text = item.commentCount.toString()
+
+        holder.binding.root.setOnClickListener {
+            val intent = Intent(context, BoardDetailActivity::class.java)
+            intent.putExtra("profile", item.uid)
+            intent.putExtra("nickName", item.nickName)
+            intent.putExtra("title", item.title)
+            intent.putExtra("imgContent", item.imgUrl)
+            intent.putExtra("content", item.content)
+            intent.putExtra("listAdapter", "adapter")
+            context.startActivity(intent)
+        }
 
     }
 }

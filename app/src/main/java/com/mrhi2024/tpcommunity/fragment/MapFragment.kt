@@ -2,11 +2,11 @@ package com.mrhi2024.tpcommunity.fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -27,6 +27,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.gson.Gson
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -41,12 +42,15 @@ import com.kakao.vectormap.mapwidget.component.GuiLayout
 import com.kakao.vectormap.mapwidget.component.GuiText
 import com.kakao.vectormap.mapwidget.component.Orientation
 import com.mrhi2024.tpcommunity.R
+import com.mrhi2024.tpcommunity.activites.BoardDetailActivity
+import com.mrhi2024.tpcommunity.activites.BoardWriteActivity
 import com.mrhi2024.tpcommunity.activites.PlaceDetailActivity
 import com.mrhi2024.tpcommunity.adapter.MapSearchAdapter
 import com.mrhi2024.tpcommunity.data.KakaoSearch
 import com.mrhi2024.tpcommunity.data.Place
 import com.mrhi2024.tpcommunity.data.SearchList
 import com.mrhi2024.tpcommunity.databinding.FragmentMapBinding
+import com.mrhi2024.tpcommunity.firebase.FBRef
 import com.mrhi2024.tpcommunity.network.RetrofitHelper
 import com.mrhi2024.tpcommunity.network.RetrofitService
 import retrofit2.Call
@@ -58,7 +62,6 @@ class MapFragment : Fragment(), OnClickListener {
     private lateinit var binding: FragmentMapBinding
     private val bottomSheetBehavior by lazy { BottomSheetBehavior.from(binding.bottomSheet) }
     private val searchList = mutableListOf<SearchList>()
-//    private val searchAdapter = MapSearchAdapter(requireContext(),searchList)
 
     //1. 검색장소명
     private var searchQuery: String = "" //앱 초기 검색어
@@ -85,6 +88,8 @@ class MapFragment : Fragment(), OnClickListener {
     private val myPos: LatLng = LatLng.from(latitude, longitude)
 
     private val adapter by lazy { MapSearchAdapter(requireContext(), searchList) }
+    private var isLabelAdded = false
+    private val labels = mutableMapOf<String, String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,6 +97,7 @@ class MapFragment : Fragment(), OnClickListener {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentMapBinding.inflate(inflater, container, false)
+        binding.mapView.start(mapLifiCycleCallback, mapReadyCallback)
 
         return binding.root
     }
@@ -110,11 +116,10 @@ class MapFragment : Fragment(), OnClickListener {
             requestMyLocation()
         }
 
-        binding.mapView.start(mapLifiCycleCallback, mapReadyCallback)
 
         binding.rvList.adapter = adapter
 
-//        binding.btnSearch.setOnClickListener { }
+//        binding.btnSearch.setOnClickListener { mapReadyCallback }
         binding.btnPrevPage.setOnClickListener(this)
         binding.btnNextPage.setOnClickListener(this)
 
@@ -227,6 +232,21 @@ class MapFragment : Fragment(), OnClickListener {
         override fun onMapReady(p0: KakaoMap) {
 //            Toast.makeText(requireContext(), "fdfd", Toast.LENGTH_SHORT).show()
 
+            FBRef.labelRef.get().addOnSuccessListener {
+                for (snapShot: DocumentSnapshot in it) {
+                    val data = snapShot.data!!
+                    val title = data["title"].toString()
+                    val latitude = data["latitude"].toString()
+                    val longitude = data["longitude"].toString()
+
+                    val pos = LatLng.from(latitude.toDouble(), longitude.toDouble())
+                    val options = LabelOptions.from(pos).setStyles(R.drawable.blue_pin)
+                        .setTexts(title)
+                    p0.labelManager!!.layer!!.addLabel(options)
+//                    AlertDialog.Builder(requireContext()).setMessage("$latitude\n$longitude").create().show()
+                }
+            }
+
             //내 위치로 지도 카메라 이동
             val cameraUpdate: CameraUpdate = CameraUpdateFactory.newCenterPosition(myPos, 16)
             p0.moveCamera(cameraUpdate)
@@ -246,6 +266,7 @@ class MapFragment : Fragment(), OnClickListener {
                 searchQuery = binding.etSearch.text.toString()
                 pageNumber = 1
                 search(searchQuery, pageNumber)
+
                 //주변 검색 장소들에 마커 추가하기
                 val placeList: List<Place>? = searchPlaceResponse?.documents
                 placeList?.forEach {
@@ -255,13 +276,45 @@ class MapFragment : Fragment(), OnClickListener {
                         .setTexts(it.place_name, it.road_address_name).setTag(it)
                     p0.labelManager!!.layer!!.addLabel(options)
                 }
+
                 inputMethodManager.hideSoftInputFromWindow(binding.btnSearch.windowToken, 0)
                 bottomSheetBehavior.state =
                     if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_HALF_EXPANDED
                     else BottomSheetBehavior.STATE_COLLAPSED
 
-
             }
+
+            binding.btnTarget.setOnClickListener {
+                p0.moveCamera(cameraUpdate)
+            }
+
+            binding.btnAddMaker.setOnClickListener {
+
+
+                Toast.makeText(requireContext(), "원하는 위치의 라벨을 추가해주세요!!", Toast.LENGTH_SHORT).show()
+
+                p0.setOnMapClickListener { kakaoMap, latLng, pointF, poi ->
+                    if (isLabelAdded) {
+                        return@setOnMapClickListener
+                    }
+
+                    val intent = Intent(requireContext(), BoardWriteActivity::class.java)
+
+                    intent.putExtra("map", "mapFragment")
+                    resultLauncher.launch(intent)
+
+                    val options = LabelOptions.from(latLng).setStyles(R.drawable.blue_pin)
+                    p0.labelManager!!.layer!!.addLabel(options)
+
+                    labels["latitude"] = latLng.latitude.toString()
+                    labels["longitude"] = latLng.longitude.toString()
+
+                    isLabelAdded = true
+
+                }
+                isLabelAdded = false
+            }
+
 
             //라벨 클릭에 반응하기
             p0.setOnLabelClickListener { kakaoMap, layer, label ->
@@ -293,6 +346,11 @@ class MapFragment : Fragment(), OnClickListener {
 
             //정보창 클릭에 반응하기
             p0.setOnInfoWindowClickListener { kakaoMap, infoWindow, guiId ->
+
+//                if () {
+//                    startActivity(Intent(requireContext(), BoardDetailActivity::class.java))
+//                }
+
                 //장소에 대한 상세 소개 웹페이지를 보여주는 화면으로 이동
                 val intent = Intent(requireContext(), PlaceDetailActivity::class.java)
 
@@ -321,6 +379,21 @@ class MapFragment : Fragment(), OnClickListener {
         }
 
     }
+
+    private val resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+
+                val title = it.data?.getStringExtra("title")
+
+                labels["title"] = title.toString()
+
+                FBRef.labelRef.document().set(labels).addOnSuccessListener {
+                    Toast.makeText(requireContext(), "라벨 추가가 완료되었습니다!!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
 
     private fun search(query: String, page: Int) {
         searchQuery = binding.etSearch.text.toString()
@@ -396,6 +469,7 @@ class MapFragment : Fragment(), OnClickListener {
                 pageNumber++
                 binding.tvPageNumber.text = pageNumber.toString()
                 search(searchQuery, pageNumber)
+
             }
 
         }//when

@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import com.mrhi2024.tpcommunity.G
 import com.mrhi2024.tpcommunity.databinding.ActivityBoardWriteBinding
 import com.mrhi2024.tpcommunity.firebase.FBRef
+import com.mrhi2024.tpcommunity.fragment.MapFragment
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -29,6 +30,40 @@ class BoardWriteActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { clickSave() }
         binding.ivBoard.setOnClickListener { getImage() }
+
+        if (intent != null && intent.hasExtra("map")) {
+            binding.btnSave.setOnClickListener { clickSave2() }
+        }
+
+    }
+
+    private fun clickSave2() {
+        val board = mutableMapOf<String, String>()
+        val intent = Intent()
+
+        board["title"] = binding.editTextTitle.text.toString()
+        board["content"] = binding.inputLayoutContent.editText!!.text.toString()
+        board["boardUid"] = G.userUid
+        board["nickName"] = G.userNickname
+        board["imgUrl"] = fileName
+
+        intent.putExtra("title", binding.editTextTitle.text.toString())
+        setResult(RESULT_OK, intent)
+        if (binding.ivBoard.drawable is VectorDrawable) {
+            Toast.makeText(this, "사진을 선택해주세요!", Toast.LENGTH_SHORT).show()
+            return
+        } else if (binding.editTextTitle.text.toString().isEmpty() && binding.inputLayoutContent.editText!!.text.toString().isNullOrEmpty()) {
+            Toast.makeText(this, "제목 또는 게시글 내용을 입력해주세요!", Toast.LENGTH_SHORT).show()
+            return
+        } else {
+            FBRef.boardRef.document(documentName).set(board).addOnSuccessListener {
+                Toast.makeText(this, "작성 완료", Toast.LENGTH_SHORT).show()
+            }
+            boardImgUpload()
+            finish()
+        }
+
+
     }
 
     private fun getImage() {
