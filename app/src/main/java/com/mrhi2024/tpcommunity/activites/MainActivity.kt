@@ -20,11 +20,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        supportFragmentManager.beginTransaction().add(R.id.container, HomeFragment()).commit()
+        supportFragmentManager.beginTransaction().add(R.id.container, ListFragment()).commit()
 
         binding.bnv.setOnItemSelectedListener {
             when(it.itemId) {
-                R.id.menu_bnv_home -> supportFragmentManager.beginTransaction().replace(R.id.container, HomeFragment()).commit()
+//                R.id.menu_bnv_home -> supportFragmentManager.beginTransaction().replace(R.id.container, HomeFragment()).commit()
                 R.id.menu_bnv_place -> supportFragmentManager.beginTransaction().replace(R.id.container, MapFragment()).commit()
                 R.id.menu_bnv_list -> supportFragmentManager.beginTransaction().replace(R.id.container, ListFragment()).commit()
                 R.id.menu_bnv_profile -> {

@@ -47,7 +47,11 @@ class BoardWriteActivity : AppCompatActivity() {
         board["nickName"] = G.userNickname
         board["imgUrl"] = fileName
 
+        intent.putExtra("uid", G.userUid)
+        intent.putExtra("nickName", G.userNickname)
         intent.putExtra("title", binding.editTextTitle.text.toString())
+        intent.putExtra("content", binding.inputLayoutContent.editText!!.text.toString())
+        intent.putExtra("imgUrl", fileName)
         setResult(RESULT_OK, intent)
         if (binding.ivBoard.drawable is VectorDrawable) {
             Toast.makeText(this, "사진을 선택해주세요!", Toast.LENGTH_SHORT).show()

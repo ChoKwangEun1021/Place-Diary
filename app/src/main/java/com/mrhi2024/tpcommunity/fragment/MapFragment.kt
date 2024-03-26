@@ -6,10 +6,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -18,6 +21,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -28,6 +32,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.google.gson.Gson
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -38,12 +44,14 @@ import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.kakao.vectormap.label.LabelLayer
 import com.kakao.vectormap.label.LabelOptions
 import com.kakao.vectormap.mapwidget.InfoWindowOptions
+import com.kakao.vectormap.mapwidget.component.GuiImage
 import com.kakao.vectormap.mapwidget.component.GuiLayout
 import com.kakao.vectormap.mapwidget.component.GuiText
 import com.kakao.vectormap.mapwidget.component.Orientation
 import com.mrhi2024.tpcommunity.R
 import com.mrhi2024.tpcommunity.activites.BoardDetailActivity
 import com.mrhi2024.tpcommunity.activites.BoardWriteActivity
+import com.mrhi2024.tpcommunity.activites.LoginActivity
 import com.mrhi2024.tpcommunity.activites.PlaceDetailActivity
 import com.mrhi2024.tpcommunity.adapter.MapSearchAdapter
 import com.mrhi2024.tpcommunity.data.KakaoSearch
@@ -57,6 +65,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.Exception
+import java.net.URL
+import kotlin.concurrent.thread
 
 class MapFragment : Fragment(), OnClickListener {
     private lateinit var binding: FragmentMapBinding
@@ -90,7 +100,6 @@ class MapFragment : Fragment(), OnClickListener {
     private val adapter by lazy { MapSearchAdapter(requireContext(), searchList) }
     private var isLabelAdded = false
     private val labels = mutableMapOf<String, String>()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -122,6 +131,7 @@ class MapFragment : Fragment(), OnClickListener {
 //        binding.btnSearch.setOnClickListener { mapReadyCallback }
         binding.btnPrevPage.setOnClickListener(this)
         binding.btnNextPage.setOnClickListener(this)
+//        binding.btnAddMaker.setOnClickListener(this)
 
         bottomSheet()
 
@@ -230,7 +240,6 @@ class MapFragment : Fragment(), OnClickListener {
 
     private val mapReadyCallback = object : KakaoMapReadyCallback() {
         override fun onMapReady(p0: KakaoMap) {
-//            Toast.makeText(requireContext(), "fdfd", Toast.LENGTH_SHORT).show()
 
             FBRef.labelRef.get().addOnSuccessListener {
                 for (snapShot: DocumentSnapshot in it) {
@@ -238,10 +247,12 @@ class MapFragment : Fragment(), OnClickListener {
                     val title = data["title"].toString()
                     val latitude = data["latitude"].toString()
                     val longitude = data["longitude"].toString()
+                    val imgUrl = data["imgUrl"].toString()
 
                     val pos = LatLng.from(latitude.toDouble(), longitude.toDouble())
-                    val options = LabelOptions.from(pos).setStyles(R.drawable.blue_pin)
-                        .setTexts(title)
+                    val options =
+                        LabelOptions.from(pos).setStyles(R.drawable.blue_pin).setTag(imgUrl)
+                            .setTexts(title)
                     p0.labelManager!!.layer!!.addLabel(options)
 //                    AlertDialog.Builder(requireContext()).setMessage("$latitude\n$longitude").create().show()
                 }
@@ -290,7 +301,6 @@ class MapFragment : Fragment(), OnClickListener {
 
             binding.btnAddMaker.setOnClickListener {
 
-
                 Toast.makeText(requireContext(), "원하는 위치의 라벨을 추가해주세요!!", Toast.LENGTH_SHORT).show()
 
                 p0.setOnMapClickListener { kakaoMap, latLng, pointF, poi ->
@@ -301,13 +311,12 @@ class MapFragment : Fragment(), OnClickListener {
                     val intent = Intent(requireContext(), BoardWriteActivity::class.java)
 
                     intent.putExtra("map", "mapFragment")
+                    labels["latitude"] = latLng.latitude.toString()
+                    labels["longitude"] = latLng.longitude.toString()
                     resultLauncher.launch(intent)
 
                     val options = LabelOptions.from(latLng).setStyles(R.drawable.blue_pin)
                     p0.labelManager!!.layer!!.addLabel(options)
-
-                    labels["latitude"] = latLng.latitude.toString()
-                    labels["longitude"] = latLng.longitude.toString()
 
                     isLabelAdded = true
 
@@ -319,48 +328,101 @@ class MapFragment : Fragment(), OnClickListener {
             //라벨 클릭에 반응하기
             p0.setOnLabelClickListener { kakaoMap, layer, label ->
 
-                label.apply {
-                    //정보창 [infoWindow] 보여주기
-                    val layout = GuiLayout(Orientation.Vertical)
-                    layout.setPadding(16, 16, 16, 16)
-                    layout.setBackground(R.drawable.base_msg, true)
 
-                    texts.forEach {
-                        val guiText = GuiText(it)
-                        guiText.setTextSize(30)
-                        guiText.setTextColor(Color.WHITE)
-                        layout.addView(guiText)
+                if (label.tag is Place) {
+
+                    label.apply {
+                        //정보창 [infoWindow] 보여주기
+                        val layout = GuiLayout(Orientation.Vertical)
+                        layout.setPadding(16, 16, 16, 16)
+                        layout.setBackground(R.drawable.base_msg, true)
+
+                        texts.forEach {
+                            val guiText = GuiText(it)
+                            guiText.setTextSize(30)
+                            guiText.setTextColor(Color.WHITE)
+                            layout.addView(guiText)
+                        }
+
+                        //정보창 [info window] 객체 만들기
+                        val options: InfoWindowOptions = InfoWindowOptions.from(position)
+                        options.body = layout
+                        options.setBodyOffset(0f, -10f)
+                        options.setTag(tag)
+
+                        kakaoMap.mapWidgetManager!!.infoWindowLayer.removeAll()
+                        kakaoMap.mapWidgetManager!!.infoWindowLayer.addInfoWindow(options)
+                    }//apply
+
+                } else {
+                    label.apply {
+
+                        val imgUrl = Firebase.storage.getReference("boardImg/${tag}")
+                        imgUrl.downloadUrl.addOnSuccessListener { uri->
+
+                            thread {
+
+                                val layout = GuiLayout(Orientation.Vertical)
+                                layout.setPadding(4, 4, 4, 4)
+//                                layout.setBackground(R.drawable.base_msg, true)
+
+                                val inputStream = URL(uri.toString()).openStream()
+                                val bm:Bitmap = BitmapFactory.decodeStream(inputStream)
+                                val bm2= Bitmap.createScaledBitmap(bm, 100,100, true)
+                                val guiImage = GuiImage(bm2)
+                                layout.addView(guiImage)
+
+                                texts.forEach {
+                                    val guiText = GuiText(it)
+                                    guiText.setTextSize(30)
+                                    guiText.setTextColor(Color.BLACK)
+                                    layout.addView(guiText)
+                                }
+
+                                val options: InfoWindowOptions = InfoWindowOptions.from(position)
+                                options.body = layout
+                                options.setBodyOffset(0f, -10f)
+                                options.setTag(tag)
+
+                                //정보창 [info window] 객체 만들기
+                                requireActivity().runOnUiThread {
+                                    kakaoMap.mapWidgetManager!!.infoWindowLayer.removeAll()
+                                    kakaoMap.mapWidgetManager!!.infoWindowLayer.addInfoWindow(options)
+                                }
+
+                            }//thread
+
+                        }//download uri
+
                     }
 
-                    //정보창 [info window] 객체 만들기
-                    val options: InfoWindowOptions = InfoWindowOptions.from(position)
-                    options.body = layout
-                    options.setBodyOffset(0f, -10f)
-                    options.setTag(tag)
+                }
 
-                    kakaoMap.mapWidgetManager!!.infoWindowLayer.removeAll()
-                    kakaoMap.mapWidgetManager!!.infoWindowLayer.addInfoWindow(options)
-                }//apply
 
             }//label click
 
             //정보창 클릭에 반응하기
             p0.setOnInfoWindowClickListener { kakaoMap, infoWindow, guiId ->
 
-//                if () {
-//                    startActivity(Intent(requireContext(), BoardDetailActivity::class.java))
-//                }
+                if (infoWindow.tag is Place) {
+                    //장소에 대한 상세 소개 웹페이지를 보여주는 화면으로 이동
+                    val intent = Intent(requireContext(), PlaceDetailActivity::class.java)
 
-                //장소에 대한 상세 소개 웹페이지를 보여주는 화면으로 이동
-                val intent = Intent(requireContext(), PlaceDetailActivity::class.java)
+                    //클릭한 장소에 대한 정보를 Json문자열로 변환하여 전달해주기
+                    val place: Place = infoWindow.tag as Place
 
-                //클릭한 장소에 대한 정보를 Json문자열로 변환하여 전달해주기
-                val place: Place = infoWindow.tag as Place
+                    val json: String = Gson().toJson(place)
 
-                val json: String = Gson().toJson(place)
+                    intent.putExtra("place", json)
+                    startActivity(intent)
+                } else {
+                    val intent = Intent(requireContext(), BoardDetailActivity::class.java)
+                    intent.putExtra("imgUrl", infoWindow.tag.toString())
+                    startActivity(intent)
 
-                intent.putExtra("place", json)
-                startActivity(intent)
+                }
+
+
             }
 
             adapter.setOnItemClickListner(object : MapSearchAdapter.OnItemClickListner {
@@ -384,9 +446,17 @@ class MapFragment : Fragment(), OnClickListener {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
 
+                val uid = it.data?.getStringExtra("uid")
+                val nickName = it.data?.getStringExtra("nickName")
                 val title = it.data?.getStringExtra("title")
+                val content = it.data?.getStringExtra("content")
+                val imgUrl = it.data?.getStringExtra("imgUrl")
 
+                labels["uid"] = uid.toString()
+                labels["nickName"] = nickName.toString()
                 labels["title"] = title.toString()
+                labels["content"] = content.toString()
+                labels["imgUrl"] = imgUrl.toString()
 
                 FBRef.labelRef.document().set(labels).addOnSuccessListener {
                     Toast.makeText(requireContext(), "라벨 추가가 완료되었습니다!!", Toast.LENGTH_SHORT)
@@ -469,9 +539,27 @@ class MapFragment : Fragment(), OnClickListener {
                 pageNumber++
                 binding.tvPageNumber.text = pageNumber.toString()
                 search(searchQuery, pageNumber)
-
             }
 
+//            R.id.btn_addMaker -> {
+//                if (isLogin()) {
+//                    mapReadyCallback
+//                } else {
+//                    AlertDialog.Builder(requireContext()).setTitle("로그인 확인").setMessage("로그인을 해주셔야 이용 가능합니다!!")
+//                        .setPositiveButton("확인") { dialog, id ->
+//                            startActivity(Intent(requireContext(), LoginActivity::class.java))
+//                            activity?.finish()
+//                        }.setNegativeButton("취소") { dialog, id ->
+//                            dialog.dismiss()
+//                        }.create().show()
+//                }
+//            }
+
         }//when
+    }
+
+    private fun isLogin(): Boolean {
+        val spf = requireContext().getSharedPreferences("loginSave", AppCompatActivity.MODE_PRIVATE)
+        return spf.getBoolean("isLogin", false)
     }
 }
