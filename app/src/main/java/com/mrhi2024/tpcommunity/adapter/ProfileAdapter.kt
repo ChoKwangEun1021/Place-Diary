@@ -3,6 +3,7 @@ package com.mrhi2024.tpcommunity.adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -24,6 +25,10 @@ class ProfileAdapter(val context: Context, val itemList: List<ProfileItem>): Ada
 
 
         Glide.with(context).load(item.iv).into(holder.binding.iv1)
+
+        holder.binding.root.setOnClickListener {
+            Toast.makeText(context, "아직 구현되지 않은 기능입니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
 }

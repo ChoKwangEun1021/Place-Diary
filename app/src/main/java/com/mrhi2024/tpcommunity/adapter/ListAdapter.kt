@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -63,5 +64,16 @@ class ListAdapter(val context: Context, val itemList: List<Board>): Adapter<List
             context.startActivity(intent)
         }
 
+        holder.binding.ivChat.setOnClickListener {
+            Toast.makeText(context, "아직 구현되지 않은 기능입니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        holder.binding.ivFavorite.setOnClickListener {
+            Toast.makeText(context, "아직 구현되지 않은 기능입니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        holder.binding.ivList.setOnClickListener {
+            Toast.makeText(context, "아직 구현되지 않은 기능입니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 }
